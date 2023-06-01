@@ -1,0 +1,47 @@
+name: cd
+
+on:
+  push
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.9"
+      - name: check out repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 pytest
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        
+        
+
+  cd:
+
+    needs: ci
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Install SSH client
+        run: sudo apt-get install -y sshpass
+      - name: upload app
+        run: |
+          sshpass -p ${{ secrets.SSH_PASSWORD }} ssh -o StrictHostKeyChecking=no azureuser@40.88.34.72 "git clone https://github.com/shaniblau/orientation-python.git && cd orientation-python && pip install -r requirements.txt && pwd && python3 main.py"
+      
+          
