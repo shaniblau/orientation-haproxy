@@ -15,6 +15,7 @@ async def create_upload_file(file: UploadFile):
     name = file.filename
     if not os.path.exists("../dogs"):
         os.mkdir("../dogs")
-    with open(f"../dogs/{name}", 'wb') as file:
-        file.read()
+    file_path = os.path.join("../dogs", name)
+    with open(file_path, 'wb') as f:
+        f.write(await file.read())
     return {"filename": name}
